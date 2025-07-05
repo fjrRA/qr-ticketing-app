@@ -34,3 +34,34 @@ A full-featured tourism ticketing system built with **Next.js**, **MySQL via Pri
 ```bash
 git clone https://github.com/fjrRA/qr-ticketing-app.git
 cd qr-ticketing-app
+
+### 2. Install dependencies
+
+```bash
+npm install
+# or
+yarn install
+
+### 3. Setup environment variables
+Add in .env or .env.local
+
+```bash
+DATABASE_URL=mysql://user:password@localhost:3306/your_db_name
+NEXT_PUBLIC_MIDTRANS_CLIENT_KEY=your-client-key
+MIDTRANS_SERVER_KEY=your-server-key
+FIREBASE_API_KEY=your-firebase-key
+# Add other needed secrets...
+
+### 4. Prisma setup
+
+```bash
+Add in .env
+npx prisma generate
+npx prisma migrate dev --name init
+
+### 5. Run the development server
+
+```bash
+npm run dev
+
+Open http://localhost:3000 to view in your browser.
