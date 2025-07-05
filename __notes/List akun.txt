@@ -1,0 +1,16 @@
+{
+  "email": "norabop589@cristout.com",
+  "password": "norabop589"
+}
+{
+  "email": "besigok369@ethsms.com",
+  "password": "besigok369"
+}
+{
+  "email": "vojede2503@finfave.com",
+  "password": "test1234@"
+}
+
+Akun atmin
+admin@mybaturraden.com
+Myb@turr4den2025

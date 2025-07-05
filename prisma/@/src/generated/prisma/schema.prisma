@@ -1,0 +1,247 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "@/src/generated/prisma"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model category_tourism {
+  category_id   String         @id @db.Char(5)
+  category_name String         @db.VarChar(20)
+  category_desc String?        @db.VarChar(150)
+  category_icon String?        @db.VarChar(255)
+  spots         spot_tourism[]
+}
+
+model facility {
+  facility_id       String             @id @db.Char(10)
+  facility_name     String             @db.VarChar(100)
+  facility_icon     String?            @db.VarChar(255)
+  facility_tourisms facility_tourism[]
+}
+
+model facility_tourism {
+  facility_tourism_id String        @id @db.Char(10)
+  spot_id             String?       @db.Char(10)
+  facility_id         String?       @db.Char(10)
+  spot                spot_tourism? @relation(fields: [spot_id], references: [spot_id], onDelete: Cascade)
+  facility            facility?     @relation(fields: [facility_id], references: [facility_id], onDelete: Cascade)
+
+  @@index([facility_id])
+  @@index([spot_id])
+}
+
+model gallery {
+  gallery_id      String        @id @db.Char(10)
+  spot_id         String?       @db.Char(10)
+  gallery_img     String?       @db.VarChar(255)
+  gallery_caption String?       @db.VarChar(255)
+  spot            spot_tourism? @relation(fields: [spot_id], references: [spot_id], onDelete: Cascade)
+
+  @@index([spot_id])
+}
+
+model operating_hours {
+  operating_id  String        @id @db.Char(10)
+  spot_id       String?       @db.Char(10)
+  operating_day OperatingDay
+  hours_open    DateTime      @db.Time(0)
+  hours_closed  DateTime      @db.Time(0)
+  spot          spot_tourism? @relation(fields: [spot_id], references: [spot_id], onDelete: Cascade)
+
+  @@index([spot_id])
+}
+
+model payment {
+  payment_id       Int           @id @default(autoincrement())
+  transaction_id   Int
+  reference_number String        @unique @db.VarChar(50)
+  payment_type     String        @db.VarChar(50)
+  payment_amount   Decimal       @db.Decimal(10, 2)
+  payment_status   PaymentStatus @default(pending)
+  payment_time     DateTime      @default(now()) @db.Timestamp(0)
+  response_data    Json
+  transaction      transaction   @relation(fields: [transaction_id], references: [transaction_id], onDelete: Cascade)
+
+  @@index([transaction_id])
+}
+
+model reviews {
+  reviews_id         String        @id @db.Char(10)
+  spot_id            String?       @db.Char(10)
+  user_id            String?       @db.Char(10)
+  reviews_rating     Int?          @db.TinyInt
+  reviews_desc       String?       @db.Text
+  reviews_created_at DateTime?     @default(now()) @db.Timestamp(0)
+  spot               spot_tourism? @relation(fields: [spot_id], references: [spot_id], onDelete: Cascade)
+  user               users?        @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+
+  @@index([spot_id])
+  @@index([user_id])
+}
+
+model spot_tourism {
+  spot_id           String             @id @db.Char(10)
+  category_id       String?            @db.Char(5)
+  village_id        String?            @db.Char(10)
+  spot_name         String             @db.VarChar(60)
+  spot_desc         String?            @db.Text
+  spot_address      String?            @db.VarChar(200)
+  spot_maps         String?            @db.VarChar(255)
+  spot_thumbnail    String?            @db.VarChar(100)
+  spot_rating       Decimal?           @default(0.00) @db.Decimal(3, 2)
+  spot_contact      String?            @db.VarChar(15)
+  facility_tourisms facility_tourism[]
+  galleries         gallery[]
+  operating_hours   operating_hours[]
+  reviews           reviews[]
+  category          category_tourism?  @relation(fields: [category_id], references: [category_id])
+  village           village?           @relation(fields: [village_id], references: [village_id])
+  tickets           ticket[]
+
+  @@index([category_id])
+  @@index([village_id])
+}
+
+model ticket {
+  ticket_id    String        @id @db.Char(20)
+  spot_id      String?       @db.Char(10)
+  ticket_name  String?       @db.VarChar(100)
+  ticket_price Decimal       @db.Decimal(10, 2)
+  ticket_desc  String?       @db.Text
+  ticket_stock Int?          @default(0)
+  code         String        @db.VarChar(10)
+  url_qr       String        @db.Text
+  spot         spot_tourism? @relation(fields: [spot_id], references: [spot_id], onDelete: Cascade, onUpdate: NoAction, map: "ticket_ibfk_1")
+
+  temp_order_details  temp_order_detail[]
+  transaction_details transaction_detail[]
+
+  @@index([spot_id], map: "spot_id")
+}
+
+model transaction {
+  transaction_id      Int                  @id @default(autoincrement())
+  user_id             String?              @db.Char(10)
+  transaction_code    String               @unique @db.VarChar(50)
+  total_price         Decimal              @db.Decimal(10, 2)
+  transaction_status  TransactionStatus?   @default(pending)
+  transaction_date    DateTime?            @default(now()) @db.Timestamp(0)
+  visit_date          DateTime             @db.Date
+  payments            payment[]
+  user                users?               @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+  transaction_details transaction_detail[]
+
+  @@index([user_id])
+}
+
+model transaction_detail {
+  transaction_detail_id Int          @id @default(autoincrement())
+  transaction_id        Int?
+  ticket_id             String?      @db.Char(20)
+  detail_quantity       Int
+  detail_price          Decimal      @db.Decimal(10, 2)
+  detail_subtotal       Decimal?     @db.Decimal(10, 2)
+  is_used               TicketStatus @default(unverified)
+  transaction           transaction? @relation(fields: [transaction_id], references: [transaction_id], onDelete: Cascade)
+  ticket                ticket?      @relation(fields: [ticket_id], references: [ticket_id], onDelete: Cascade)
+
+  @@index([ticket_id])
+  @@index([transaction_id])
+}
+
+model users {
+  user_id      String        @id @db.Char(10)
+  name         String        @db.VarChar(100)
+  email        String        @unique @db.VarChar(100)
+  password     String        @db.VarChar(255)
+  phone_number String?       @db.VarChar(20)
+  address      String?       @db.Text
+  role         Role
+  reviews      reviews[]
+  transactions transaction[]
+  temp_orders  temp_order[]
+}
+
+model village {
+  village_id   String         @id @db.Char(10)
+  village_name String         @db.VarChar(100)
+  village_city String         @db.VarChar(100)
+  spots        spot_tourism[]
+}
+
+model temp_order {
+  temp_order_id Int                 @id @default(autoincrement())
+  /// Digunakan sebagai kode transaksi yang akan dikaitkan dengan Midtrans
+  order_id      String              @unique @db.VarChar(50)
+  /// Relasi ke tabel `users` - 1 user bisa punya banyak temp_order
+  user_id       String              @db.Char(10)
+  user          users               @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+  /// Tanggal kunjungan yang dipilih user
+  visit_date    DateTime            @db.Date
+  /// Waktu dibuatnya order
+  created_at    DateTime            @default(now()) @db.Timestamp(0)
+  /// Status transaksi sementara, default: pending
+  status        TransactionStatus   @default(pending)
+  /// Relasi ke temp_order_detail - 1 temp_order bisa punya banyak detail
+  details       temp_order_detail[]
+
+  @@index([user_id])
+}
+
+model temp_order_detail {
+  temp_order_detail_id Int        @id @default(autoincrement())
+  /// Relasi ke temp_order - banyak detail mengacu ke satu order
+  temp_order_id        Int
+  temp_order           temp_order @relation(fields: [temp_order_id], references: [temp_order_id], onDelete: Cascade)
+  /// Relasi ke ticket - setiap detail berhubungan dengan satu tiket
+  ticket_id            String     @db.Char(20)
+  ticket               ticket     @relation(fields: [ticket_id], references: [ticket_id], onDelete: Cascade)
+  /// Nama pengunjung, jika perlu diisi satu per tiket (opsional)
+  visitor_name         String?    @db.VarChar(100)
+  /// Jumlah tiket yang dibeli
+  quantity             Int        @default(1)
+  /// Harga per tiket
+  price                Decimal    @db.Decimal(10, 2)
+  /// Subtotal (quantity * price)
+  subtotal             Decimal    @db.Decimal(10, 2)
+
+  @@index([temp_order_id])
+  @@index([ticket_id])
+}
+
+enum OperatingDay {
+  Senin
+  Selasa
+  Rabu
+  Kamis
+  Jumat
+  Sabtu
+  Minggu
+}
+
+enum PaymentStatus {
+  pending
+  success
+  failed
+}
+
+enum TransactionStatus {
+  pending
+  paid
+  cancelled
+}
+
+enum Role {
+  admin
+  user
+  tourism_owner
+}
+
+enum TicketStatus {
+  unverified
+  verified
+}

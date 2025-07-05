@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE `spot_tourism` ADD COLUMN `createdAt` TIMESTAMP(0) NOT NULL DEFAULT CURRENT_TIMESTAMP(0);

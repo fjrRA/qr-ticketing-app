@@ -1,0 +1,212 @@
+'use client'
+
+import Link from 'next/link'
+import { useEffect, useState, useRef } from 'react'
+import { useRouter } from 'next/navigation'
+
+export default function NavbarUser() {
+  const [open, setOpen] = useState(false)
+  const [user, setUser] = useState<{ name: string; email: string } | null>(null)
+  const [showConfirm, setShowConfirm] = useState(false)
+  const router = useRouter()
+  const menuRef = useRef<HTMLDivElement>(null)
+
+  // Ambil data user dari localStorage
+  useEffect(() => {
+    const loadUser = () => {
+      const data = localStorage.getItem('user')
+      if (data) {
+        setUser(JSON.parse(data))
+      } else {
+        setUser(null)
+      }
+    }
+
+    loadUser()
+    window.addEventListener('userChanged', loadUser)
+    return () => window.removeEventListener('userChanged', loadUser)
+  }, [])
+
+  // Klik luar (outside) akan menutup menu, jika menu terbuka
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (
+        menuRef.current &&
+        !menuRef.current.contains(event.target as Node) &&
+        // jangan tutup jika kita mengklik tombol hamburger sendiri
+        !(event.target as HTMLElement).closest('button[aria-label^="Tutup menu"]')
+      ) {
+        setOpen(false)
+      }
+    }
+    if (open) {
+      document.addEventListener('mousedown', handleClickOutside)
+    } else {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [open])
+
+  // Memastikan menu tertutup ketika klik link
+  const onLinkClick = () => {
+    setOpen(false)
+  }
+
+  const handleLogout = () => {
+    setShowConfirm(false)
+    setTimeout(() => {
+      localStorage.removeItem('user')
+      window.dispatchEvent(new Event('userChanged'))
+      router.push('/user/login')
+      setOpen(false)
+    }, 100)
+  }
+
+  return (
+    <>
+      <nav className="bg-white shadow px-6 py-4">
+        <div className="flex justify-between items-center">
+          {/* Logo / Title */}
+          <Link
+            href="/user"
+            aria-label="Beranda"
+            className="text-xl font-bold hover:bg-gray-100 px-2 py-1 rounded"
+          >
+            Baturraden Tourism
+          </Link>
+
+          {/* Menu Desktop (≥ md) */}
+          <div className="hidden md:flex items-center space-x-6">
+            {user ? (
+              <>
+                <span className="text-sm text-gray-600">Hi, {user.name}</span>
+                <button onClick={() => setShowConfirm(true)} className="text-red-600 hover:text-red-800">
+                  Logout
+                </button>
+              </>
+            ) : (
+              <Link href="/user/login" className="text-gray-700 hover:text-gray-900">
+                Login
+              </Link>
+            )}
+            <Link href="/user/payment" className="text-gray-700 hover:text-gray-900">
+              Riwayat
+            </Link>
+          </div>
+
+          {/* Hamburger Button (≤ sm/md) */}
+          <button
+            onClick={() => setOpen((prev) => !prev)}
+            className="md:hidden p-2 rounded hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500"
+            aria-label={open ? 'Tutup menu' : 'Buka menu'}
+            aria-expanded={open}
+            aria-controls="mobile-menu"
+          >
+            {open ? (
+              // Ikon “X” untuk close
+              <svg
+                className="w-6 h-6 text-gray-700"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            ) : (
+              // Ikon hamburger
+              <svg
+                className="w-6 h-6 text-gray-700"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            )}
+          </button>
+        </div>
+
+        {/* Mobile Menu (hanya render bila open === true) */}
+        {open && (
+          <div
+            ref={menuRef}
+            id="mobile-menu"
+            className="md:hidden mt-2 bg-white shadow rounded-lg overflow-hidden"
+            aria-hidden={!open}
+          >
+
+            {/* Jarak vertikal antara judul dan list item */}
+            <ul className="px-4 py-3 space-y-3">
+              {user ? (
+                <>
+                  <li>
+                    <span className="block text-gray-600">Hi, {user.name}</span>
+                  </li>
+                  <li>
+                    <button
+                      onClick={() => {
+                        setShowConfirm(true)
+                        setOpen(false)
+                      }}
+                      className="w-full text-left text-red-600 hover:text-red-800"
+                    >
+                      Logout
+                    </button>
+                  </li>
+                </>
+              ) : (
+                <li>
+                  <Link
+                    href="/user/login"
+                    onClick={onLinkClick}
+                    className="block text-gray-700 hover:text-gray-900"
+                  >
+                    Login
+                  </Link>
+                </li>
+              )}
+
+              <li>
+                <Link
+                  href="/user/payment"
+                  onClick={onLinkClick}
+                  className="block text-gray-700 hover:text-gray-900"
+                >
+                  Riwayat
+                </Link>
+              </li>
+            </ul>
+          </div>
+        )}
+      </nav>
+
+      {/* Modal Konfirmasi Logout */}
+      {showConfirm && (
+        <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center">
+          <div className="bg-white rounded-lg shadow-lg p-6 max-w-sm w-full">
+            <h2 className="text-lg font-semibold mb-4">Konfirmasi Logout</h2>
+            <p className="mb-6">Apakah Anda yakin ingin keluar dari akun?</p>
+            <div className="flex justify-end space-x-3">
+              <button
+                onClick={() => setShowConfirm(false)}
+                className="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded"
+              >
+                Batal
+              </button>
+              <button
+                onClick={handleLogout}
+                className="px-4 py-2 bg-red-600 text-white hover:bg-red-700 rounded"
+              >
+                Ya, Keluar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  )
+}

@@ -1,0 +1,64 @@
+backup [id].tsx tanggal 19 Mei 2025
+
+import { NextApiRequest, NextApiResponse } from 'next';
+import prisma from '@lib/prisma';
+
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  const { id } = req.query;
+
+  if (typeof id !== 'string') {
+    return res.status(400).json({ error: 'ID tidak valid' });
+  }
+
+  try {
+    // Ambil transaksi berdasarkan transaction_code
+    const transaction = await prisma.transaction.findUnique({
+      where: {
+        transaction_code: id, // Kode transaksi yang diterima
+      },
+      include: {
+        transaction_details: {
+          include: {
+            ticket: true,
+          },
+        },
+      },
+    });
+
+    // Cek apakah transaksi tidak ditemukan
+    if (!transaction) {
+      return res.status(404).json({ error: 'Kode tidak valid' });
+    }
+
+    // Cek apakah tiket sudah digunakan
+    const alreadyUsed = transaction.transaction_details.some((detail) => detail.is_used === 'verified');
+    if (alreadyUsed) {
+      return res.status(400).json({ error: 'Tiket sudah digunakan' });
+    }
+
+    // Tandai semua detail transaksi sebagai "used"
+    const currentDate = new Date(); // Ambil waktu saat ini
+    const jakartaTime = currentDate.toLocaleString("en-US", { timeZone: "Asia/Jakarta" });
+
+    // Update status is_used menjadi 'verified' pada detail transaksi
+    await prisma.transaction_detail.updateMany({
+      where: {
+        transaction_id: transaction.transaction_id,
+        is_used: 'unverified', // Pastikan hanya yang berstatus 'unverified' yang diubah
+      },
+      data: {
+        is_used: 'verified', // Ubah status menjadi 'verified'
+      },
+    });
+
+    return res.status(200).json({
+      message: 'Tiket valid dan berhasil diverifikasi',
+      transaction_code: id,
+      timestamp: jakartaTime, // Tampilkan dalam zona waktu Jakarta
+    });
+
+  } catch (error) {
+    console.error('[VALIDATE ERROR]', error);
+    return res.status(500).json({ error: 'Terjadi kesalahan pada server' });
+  }
+}

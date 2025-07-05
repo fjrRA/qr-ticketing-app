@@ -1,0 +1,13 @@
+🔎 Apakah pages/api/auth/login.ts ini berguna untuk admin?
+Jawabannya: tidak, ini khusus untuk login user (pengunjung biasa).
+Kenapa?
+Karena:
+- Endpoint ini tidak melakukan verifikasi password.
+- Menggunakan Firebase (atau metode lain) dan auto-register jika email belum ada.
+- Secara default menetapkan role: 'user', bukan 'admin'.
+
+✅ Jadi, Apa Solusinya?
+🔧 Pisahkan login admin dan user:
+Kamu bisa bikin dua endpoint:
+- pages/api/auth/login-user.ts → Untuk login user via Firebase atau metode ringan
+- pages/api/auth/login-admin.ts → Untuk login admin berbasis password dan JWT

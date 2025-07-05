@@ -1,0 +1,129 @@
+Kemungkinan nanti ada perubahan:
+- Bisa auto generate di operating_hours, jadi kaya pas input langsung masuk semua dari Senen dari Jum'at, tapi harus ada perubahan
+- Harusnya di admin nggak usah ada rating, kalo pun ada nantinya rating ini awal 0.0. Nah bakal berkembang terus ya entah naek atau turun kalo emang ada user yang nilai
+================================
+
+🎯 REKOMENDASI URUTAN LANJUTAN (PENYELESAIAN ADMIN PANEL)
+✅ 1. Selesaikan Fitur Transaksi
+Sudah 80% selesai — tinggal lengkapi:
+
+ Menampilkan detail transaksi dari transaction_detail + ticket
+
+ Tambahkan total keseluruhan per item (subtotal)
+
+ (Opsional) Tambahkan QR Code jika dibutuhkan
+
+🔜 2. Fitur Admin: Pembayaran (tabel payment)
+Menampilkan riwayat pembayaran, metode, jumlah dibayar, service fee, status
+
+ API GET admin: ambil semua data payment
+
+ Tampilkan kolom penting di table admin: reference_number, payment_status, total_payment
+
+ Tambahkan tombol untuk lihat detail (response dari Midtrans?)
+
+🔜 3. Fitur Admin: Tiket
+Admin bisa tambah / ubah stok tiket untuk tiap tempat wisata
+
+ Tambah tombol "Lihat Tiket" dari detail transaksi
+
+ CRUD Tiket (kalau belum lengkap)
+
+ Validasi stok tiket dan kode QR
+
+🔜 4. Fitur Admin: Review
+Tampilkan review dari pengguna terhadap destinasi
+
+ API GET review + relasi user + destinasi
+
+ Tambahkan tombol hapus review (spam, kasar, dsb.)
+
+🔜 5. Fitur Admin: User
+Data user untuk keperluan monitoring
+
+ API GET user (role: user, tourism_owner)
+
+ Tambahkan filter berdasarkan role
+
+ (Opsional) Aktifkan/deaktivasi akun user
+================================
+
+Kodenya sekarang sudah bebas error dan siap dikembangkan lebih lanjut. Besok saat lanjut, kamu bisa eksplorasi:
+- 🖼️ Galeri wisata (gallery)
+- 🕒 Jam operasional (operating_hours)
+- ⭐ Review pengguna (reviews)
+- 🎟️ Harga dan pembelian tiket (ticket + tombol Midtrans)
+Kalau besok kamu butuh bantuan lanjutan, tinggal lanjutkan dari sini — aku siap bantu kapan saja.
+Semangat dan selamat istirahat! 💪
+
+================================
+Tentu, logika yang kamu sampaikan sangat mungkin diterapkan. Berikut adalah langkah-langkah implementasi untuk memastikan alur transaksi berjalan dengan benar berdasarkan skenario yang kamu buat:
+
+1. Skenario Pembelian Tiket:
+- 1 tiket untuk 1 orang: Pembelian tiket berdasarkan jumlah tiket yang dibeli. Setiap tiket akan terkait dengan satu pengguna (user).
+- Pembelian lebih dari 1 tiket: Jika pengguna membeli lebih dari satu tiket, mereka akan diminta untuk mengisi informasi tambahan, seperti nama, nomor identitas, atau informasi lainnya.
+- Download Tiket: Setelah transaksi berhasil, tiket yang dibeli dapat diunduh oleh pengguna.
+
+2. Langkah-langkah Pengembangan:
+A. Frontend:
+- Halaman Pembelian Tiket:
+  - Pengguna memilih tiket dan jumlah yang akan dibeli.
+  - Jika jumlah tiket lebih dari satu, tampilkan form untuk memasukkan data tambahan (misalnya nama, email, nomor HP untuk setiap tiket).
+B. Backend:
+1. Menyimpan Data Pembelian Tiket
+- Di backend, setelah pengguna memilih tiket dan mengisi data tambahan, kita akan menyimpan data transaksi. Misalnya, untuk setiap tiket yang dibeli, kita akan membuat detail transaksi yang terkait dengan transaction_id.
+- Setiap transaction_detail akan memiliki informasi mengenai tiket yang dibeli, kuantitas, harga, dan informasi pengguna (seperti nama dan nomor HP jika membeli lebih dari satu tiket).
+2. Membuat Transaksi dan Detailnya
+- Ketika transaksi pembayaran dimulai, backend akan membuat transaksi baru di tabel transaction, lalu untuk setiap tiket yang dibeli, backend akan menyimpan data di tabel transaction_detail sesuai dengan jumlah tiket yang dibeli.
+3. Membuat URL untuk Tiket dan Menghubungkannya dengan Pembayaran
+- Setelah pembayaran berhasil, buat URL unik untuk tiket yang dapat diunduh oleh pengguna (misalnya dengan menyertakan QR Code atau ID unik tiket).
+- URL ini bisa disimpan di tabel ticket atau sebagai kolom baru di transaction_detail untuk setiap tiket yang dibeli.
+- Implementasikan endpoint untuk mengunduh tiket berdasarkan ID transaksi.
+C. Menangani Pembayaran dengan Midtrans
+- Gunakan token dari Midtrans untuk menginisiasi pembayaran seperti yang dijelaskan sebelumnya.
+- Setelah pembayaran sukses, lakukan update status transaksi menjadi paid dan beri akses pada pengguna untuk mendownload tiket yang sesuai dengan pembelian.
+
+3. Download Tiket:
+- Setelah pembayaran berhasil, pengguna bisa mengunduh tiket menggunakan endpoint API.
+- Gunakan QR code atau ID unik tiket untuk menghasilkan file PDF yang dapat diunduh oleh pengguna.
+================================
+
+Perbedaan dan Kegunaan pages/api/admin/transaction/callback.ts dan pages/api/payment/callback.ts
+
+1.pages/api/admin/transaction/callback.ts:
+- Tujuan: Callback ini lebih berfokus pada pembaruan status transaksi dan generasi QR code untuk tiket.
+- Fungsi: Begitu status transaksi dikonfirmasi (misalnya settlement atau capture), callback ini akan memperbarui status transaksi di database menjadi "paid" dan juga menghasilkan QR code untuk detail transaksi tersebut. QR code ini kemudian disimpan di masing-masing transaction_detail yang relevan.
+- Proses:
+-- Periksa status transaksi (settlement atau capture).
+-- Update status transaksi menjadi "paid".
+-- Generate QR Code untuk setiap detail transaksi dan menyimpannya di database.
+- Mengapa Berguna: Callback ini sangat berguna untuk memastikan bahwa status pembayaran dan QR code diupdate secara otomatis ketika pembayaran berhasil. Ini sangat cocok untuk sistem tiket, di mana transaksi yang berhasil perlu diproses lebih lanjut dengan generasi QR untuk validasi tiket.
+2. pages/api/payment/callback.ts:
+- Tujuan: Callback ini berfungsi untuk validasi signature dari Midtrans dan verifikasi pembayaran.
+- Fungsi: Callback ini menerima data dari Midtrans setelah transaksi selesai. Ia memvalidasi signature untuk memastikan data yang diterima sah dan berasal dari Midtrans. Jika valid, callback akan memberi respons dengan status sukses, sedangkan jika tidak valid, ia akan mengembalikan error.
+- Proses:
+-- Validasi Signature Midtrans untuk memastikan data yang diterima sah dan tidak dimanipulasi.
+-- Pengembalian status untuk memberi tahu Midtrans jika callback berhasil atau tidak.
+- Mengapa Berguna: Callback ini penting untuk memastikan bahwa data transaksi yang diterima berasal dari sumber yang sah. Hal ini diperlukan untuk menghindari potensi penipuan atau manipulasi data transaksi, serta untuk menjaga integritas alur pembayaran.
+
+Apakah pages/api/admin/transaction/callback.ts Masih Berguna?
+Ya, pages/api/admin/transaction/callback.ts masih sangat berguna, terutama untuk aplikasi yang menggunakan QR code sebagai bagian dari proses verifikasi tiket.
+- Jika kamu ingin memastikan bahwa QR code dihasilkan dan dihubungkan dengan transaksi yang berhasil, callback ini harus tetap digunakan.
+- Callback ini menangani bagian penting dari pembaharuan status transaksi dan QR code generation, yang tidak ditangani oleh callback payment/callback.ts.
+
+Sementara itu, pages/api/payment/callback.ts hanya memvalidasi transaksi dari Midtrans. Callback ini lebih berfokus pada keamanan transaksi dan bukan pada proses lanjutan seperti QR code generation atau pembaruan status yang lebih spesifik dalam transaksi tiket.
+
+Kapan Kedua Callback Ini Dijalankan?
+- payment/callback.ts akan menangani validasi signature dari Midtrans untuk memastikan transaksi diterima atau tidak, dan memverifikasi status pembayaran secara umum.
+- transaction/callback.ts akan menangani logika spesifik dalam sistemmu seperti pembaharuan status transaksi menjadi paid dan pembuatan QR code setelah transaksi berhasil.
+
+Jadi, kedua callback ini memiliki peran yang berbeda tetapi saling melengkapi. Untuk integrasi yang lebih lengkap, kamu membutuhkan keduanya untuk memastikan bahwa pembayaran berhasil dan detail transaksi (termasuk QR) dikelola dengan benar.
+
+Ringkasan:
+- payment/callback.ts: Validasi transaksi dengan Midtrans.
+- transaction/callback.ts: Pembaruan status transaksi, pembuatan QR code untuk tiket.
+
+Kedua file ini tidak saling menggantikan, tetapi saling melengkapi, jadi pastikan keduanya tetap ada untuk memastikan integritas sistem pembayaran dan tiket.
+=======================================
+
+4811 1111 1111 1114

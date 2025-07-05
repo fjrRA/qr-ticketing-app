@@ -1,0 +1,42 @@
+backup generateTicketPdf.ts tanggal 19 Mei 2025
+
+import { PDFDocument } from 'pdf-lib';
+
+export async function generateTicketPdf(
+  transactionCode: string,
+  qrCodeUrl: string,
+  additionalData: string
+): Promise<Uint8Array> {
+  const [userName, destinationName, date] = additionalData.split(',');
+
+  const formattedDate = new Date(date).toLocaleString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric' });
+
+  // Buat PDF Document baru
+  const pdfDoc = await PDFDocument.create();
+
+  // Tambahkan halaman
+  const page = pdfDoc.addPage([600, 400]);
+
+  // Menambahkan teks ke halaman
+  page.drawText(`Transaction Code: ${transactionCode}`, { x: 50, y: 350, size: 18 });
+  page.drawText(`Name: ${userName}`, { x: 50, y: 320, size: 18 });
+  page.drawText(`Destination: ${destinationName}`, { x: 50, y: 290, size: 18 });
+  page.drawText(`Date: ${formattedDate}`, { x: 50, y: 260, size: 18 });
+
+  // Generate QR Code dan embed ke dalam PDF
+  const qrImage = await pdfDoc.embedPng(qrCodeUrl);
+  const qrDims = qrImage.scale(0.70); // Skalakan QR code
+
+  // Tentukan lokasi QR code di pojok kiri bawah
+  page.drawImage(qrImage, {
+    x: 350,  // Posisi X QR code di pojok kiri
+    y: 50,  // Posisi Y QR code di pojok bawah
+    width: qrDims.width,  // Ukuran lebar QR Code
+    height: qrDims.height,  // Ukuran tinggi QR Code
+  });
+
+  // Simpan PDF dalam bentuk byte array
+  const pdfBytes = await pdfDoc.save();
+
+  return pdfBytes; // Mengembalikan PDF dalam bentuk byte array
+}

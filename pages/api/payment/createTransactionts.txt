@@ -1,0 +1,58 @@
+import { NextApiRequest, NextApiResponse } from 'next';
+import * as midtransClient from 'midtrans-client';
+import prisma from '@lib/prisma';
+
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Method Not Allowed' });
+  }
+
+  const { amount, order_id, visit_date } = req.body;
+
+  try {
+    const coreApi = new midtransClient.CoreApi({
+      serverKey: process.env.MIDTRANS_SERVER_KEY, // Gunakan server key
+      clientKey: process.env.MIDTRANS_CLIENT_KEY, // Gunakan client key
+      isProduction: false, // Gunakan false untuk sandbox
+    });
+
+    const parameter = {
+      payment_type: 'credit_card',
+      transaction_details: {
+        order_id: order_id,
+        gross_amount: amount,
+      },
+      credit_card: {
+        secure: true,
+        token_id: 'token-id-dari-tokenisasi',  // Ini adalah token yang Anda dapatkan setelah tokenisasi di frontend
+      },
+    };
+
+
+    const chargeResponse = await coreApi.charge(parameter);
+
+     const expiredAt = new Date();
+    expiredAt.setHours(expiredAt.getHours() + 24); // Menambahkan 24 jam
+
+     const visitDate = visit_date || new Date();
+
+    // Simpan transaksi ke database dengan expired_at yang sudah ditentukan
+    await prisma.transaction.create({
+      data: {
+        transaction_code: order_id,
+        total_price: amount,
+        transaction_status: 'pending',
+        transaction_date: new Date(),
+        expired_at: expiredAt, // Set expired_at
+        visit_date: visitDate, // Set visit_date
+      },
+    });
+
+    res.status(200).json(chargeResponse); // Mengirimkan hasil dari Midtrans
+  } catch (error) {
+    console.error('Payment error:', error);
+    res.status(500).json({ error: 'Payment processing failed' });
+  }
+}
+console.log('Server Key:', process.env.MIDTRANS_SERVER_KEY);
+console.log('Client Key:', process.env.MIDTRANS_CLIENT_KEY);

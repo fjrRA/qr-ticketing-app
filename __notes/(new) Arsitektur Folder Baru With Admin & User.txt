@@ -1,0 +1,387 @@
+Update lagi kalo proyek ada perubahan
+
+folder proyek baturraden-apps
+|- __notes --> folder yang berisi catatan saja
+|- .next
+|- lib
+   |-pdf
+     |- generateTicketPdf.ts
+   |- auth.ts
+   |- email.ts
+   |- firebase.ts
+   |- mailer.ts
+   |- parseForm.ts
+   |- parseFormWithSubfolder.ts
+   |- prisma.ts
+   |- qrcode.ts  # Tambahkan file untuk menangani pembuatan QR Code
+   |- utils.ts
+|- node_modules
+|- pages
+   |- api
+      |- admin               # Semua API yang hanya dapat diakses oleh admin
+         |- category
+            |- delete
+               |- [id].ts
+            |- update
+               |- [id].ts
+            |- create.ts
+            |- route.ts
+         |- dashboard
+            |- payment-method-chart.ts
+            |- revenue-chart.ts
+            |- summary.ts
+            |- transaction-chart.ts
+         |- destination
+            |- delete
+               |- [id].ts
+            |- update
+               |- [id].ts
+            |- create.ts
+            |- route.ts
+         |- facility
+            |- delete
+               |- [id].ts
+            |- update
+               |- [id].ts
+            |- create.ts
+            |- route.ts
+         |- gallery
+            |- delete
+               |- [id].ts
+            |- update
+               |- [id].ts
+            |- create.ts
+            |- route.ts
+         |- operating
+            |- delete
+               |- [id].ts
+            |- update
+               |- [id].ts
+            |- create.ts
+            |- route.ts
+         |- payment
+            |- createTransaction.ts
+            |- route.ts
+            |- status.ts
+         |- reviews
+            |- delete
+               |- [id].ts
+            |- route.ts
+         |- ticket
+            |- create.ts
+            |- update
+               |- [id].ts
+            |- delete
+               |- [id].ts
+            |- route.ts
+         |- transaction
+            |- detail
+               |- [id].ts
+            |- update
+               |- [id].ts
+            |- route.ts
+            |- callback.ts
+         |- user
+            |- delete
+               |- [id].ts
+            |- route.ts
+         |- village
+            |- delete
+               |- [id].ts
+            |- update
+               |- [id].ts
+            |- create.ts
+            |- route.ts
+      |- auth                # API untuk otentikasi pengguna
+         |- forgot-password.ts
+         |- login-admin.ts
+         |- login.ts
+         |- logout.ts
+         |- register.ts
+         |- reset-password.ts
+      |- order
+         |- temp
+            |- route.ts
+         |- temp.ts
+      |- payment
+         |- createTransaction.ts
+         |- callbackts.txt
+         |- history.ts
+         |- notification.ts
+         |- retry.ts
+         |- tokenize.ts
+      |- qrcode
+         |- [code].ts
+      |- ticket
+         |- pdf.ts
+      |- user                # API untuk pengguna
+         |- destination 
+            |- [slug]
+               |- route.ts
+            |- route.ts          # API untuk mengambil spot wisata
+         |- payment (kosong)
+         |- reviews (kosong)
+         |- ticket
+            |- grouped.ts
+            |- route.ts
+         |- transaction
+            |- cancel.ts
+            |- route.ts
+      |- validate
+         |- [id].ts
+      |- generate-ticket.ts
+      |- use-ticket.ts
+   |- _document.tsx
+|- prisma
+   |- @
+   |- migrations
+   |- schema.prisma
+   |- seed.ts
+|- public
+   |- tickets              # Tempat menyimpan file PDF tiket yang diunduh (tidak digunakan)
+   |- uploads
+      |- category
+      |- destination
+      |- facility
+      |- gallery
+         |- folder per-id (gallery_id)
+         |- folder per-id (gallery_id)
+|- src
+   |- app
+      |- admin
+         |- category/page.tsx
+         |- destination/page.tsx
+         |- facility/page.tsx
+         |- gallery/page.tsx
+         |- operating/page.tsx
+         |- payment/page.tsx
+         |- reviews/page.tsx
+         |- scan/page.tsx
+         |- ticket/page.tsx
+         |- transaction/page.tsx
+         |- user/page.tsx
+         |- village/page.tsx
+         |- layout.tsx
+         |- page.tsx
+      |- api
+         |- user
+            |- by-firebase-uid
+               |- route.ts
+            |- destination
+               |- [slug]
+                  |- route.ts
+               |- route.ts
+            |- popular-spot
+               |- route.ts
+            |- review-eligible
+               |- route.ts
+            |- reviews
+               |- route.ts
+            |- today-schedule
+               |- route.ts
+      |- fonts
+      |- login
+         |- page.tsx
+      |- user
+         |- destination
+            |- [slug]
+               |- page.tsx
+         |- explore
+            |- page.tsx
+         |- forgot-password
+            |- page.tsx
+         |- payment
+            |- page.tsx
+         |- register
+            |- page.tsx
+         |- reset-password
+            |- page.tsx
+         |- ticket
+            |- page.tsx
+         |- layout.tsx
+         |- page.tsx
+      |- favicon.ico
+      |- globals.css
+      |- layout.tsx
+      |- page.tsx
+   |- components
+      |- admin
+         |- category
+            |- CategoryGrid.tsx
+            |- CategoryCard.tsx
+            |- CategoryDeleteDialog.tsx
+            |- CategoryForm.tsx
+         |- dashboard
+            |- skeleton
+               |- SkeletonDashboardSummary.tsx
+            |- AdminSummary.tsx
+            |- PaymentPieChart.tsx
+            |- RevenueChart.tsx
+            |- TransactionChart.tsx
+         |- destination
+            |- hooks
+               |- useDestinationForm.ts
+            |- DestinationGrid.tsx
+            |- DestinationCard.tsx
+            |- DestinationDeleteDialog.tsx
+            |- DestinationForm.tsx
+         |- facility
+            |- FacilityTable.tsx
+            |- FacilityDeleteDialog.tsx
+            |- FacilityForm.tsx
+         |- gallery
+            |- GalleryTable.tsx
+            |- GalleryDeleteDialog.tsx
+            |- GalleryForm.tsx
+         |- operating
+            |- OperatingTable.tsx
+            |- OperatingDeleteDialog.tsx
+            |- OperatingForm.tsx
+         |- payment
+            |- PaymentButton.tsx
+            |- PaymentTable.tsx
+            |- PaymentToolbar.tsx
+         |- reviews/ReviewTable.tsx
+         |- scan/QrScanner tsx (sudah tidak terpakai)
+         |- ticket
+            |- TicketTable.tsx
+            |- TicketDeleteDialog.tsx
+            |- TicketForm.tsx
+         |- transaction
+            |- TransactionColumns.tsx.
+            |- TransactionDetailDialog.tsx
+            |- TransactionStatusSelect.tsx
+            |- TransactionTable.tsx
+            |- TransactionToolbar.tsx
+         |- user
+            |- UserTable.tsx
+            |- UserDeleteDialog.tsx
+         |- village
+            |- VillageForm.tsx
+            |- VillageTable.tsx
+         |- Sidebar.tsx
+      |- layouts
+         |- UserLayoutWrapper.tsx
+      |- skeleton
+         |- SkeletonChart.tsx
+         |- SkeletonDestinationCard.tsx
+         |- SkeletonFormField.tsx
+         |- SkeletonFormWrapper.tsx
+         |- SkeletonPie.tsx
+         |- SkeletonStatCard.tsx
+         |- SkeletonTableRow.tsx
+      |- ui
+         |- alert-dialog.tsx
+         |- badge.tsx
+         |- button.tsx
+         |- card.tsx
+         |- data-table.tsx
+         |- dialog.tsx
+         |- download-ticket.tsx
+         |- input.tsx
+         |- label.tsx
+         |- select.tsx
+         |- skeleton.tsx
+         |- table.tsx
+         |- textarea.tsx
+         |- toast.tsx
+         |- toaster.tsx
+      |- user
+         |- destination
+            |- FacilityList.tsx
+            |- GalleryListtsx.txt
+            |- MapEmbeded.tsx
+            |- OperatingHoursList.tsx
+            |- ReviewFormWrapper.tsx
+            |- ReviewList.tsx
+            |- ReviewListWrapper.tsx
+            |- ReviewSection.tsx
+            |- SpotGallery.tsx
+            |- SpotHeader.tsx
+            |- SpotInfoGrid.tsx
+            |- SpotMap.tsx
+            |- SpotTicketSection.tsx
+            |- TicketList.tsx
+         |- explore
+            |- DestinationCard.tsx
+         |- homepage
+            |- ExplorationMapSection.tsx
+            |- FooterSection.tsx
+            |- HeroSection.tsx
+            |- LeafletMap.tsx
+            |- NewSpotSection.tsx
+            |- PopularSpotSection.tsx
+            |- TodayScheduleSection.tsx
+         |- NavbarUser
+            |- DesktopMenu.tsx
+            |- HamburgerButton.tsx
+            |- index.tsx
+            |- LogoutModal.tsx
+            |- MobileMenu.tsx
+         |- payment
+            |- CancelButton.tsx
+            |- CountdownTimer.tsx
+            |- PayNowButton.tsx
+            |- TicketDetail.tsx
+            |- TransactionDetailItem.tsx
+         |- profile
+            |- UserProfileModal.tsx
+         |- ticket
+            |- TicketDetailItem.tsx
+            |- TicketTransactionCard.tsx
+         |- NavbarUsertsx.txt
+   |- hooks
+      |- use-toast.ts
+   |- modules
+      |- admin
+         |- guards
+            |- useAdminGuard.ts
+         |- pages  (kosong)
+      |- auth
+         |- controller  (kosong)
+      |- destination
+         |- components  (kosong)
+         |- controller
+            |- fecthDetail.ts
+         |- hooks  (kosong)
+      |- midtrans 
+         |- api (kosong)
+         |- controller (kosong)
+      |- review
+         |- controller
+            |- updateSpotRating.ts
+      |- scheduler
+         |- expireTransactions.ts
+      |- ticket
+         |- components (kosong)
+         |- controller (kosong)
+      |- user
+         |- controller (kosong)
+   |- types
+      |- category.ts
+      |- destination.ts
+      |- facility.ts
+      |- gallery.ts
+      |- global.d.ts
+      |- json2csv.d.ts
+      |- midtrans-client.d.ts
+      |- midtrans.d.ts
+      |- operating-hours.ts
+      |- qrcode.d.ts
+      |- review.ts
+      |- ticket.ts
+|- styles (kosong)
+|- .env
+|- .env.local
+|- .eslintrc.json
+|- .gitignore
+|- components.json
+|- middleware.ts
+|- next-env.d.ts
+|- next.config.js
+|- package-lock.json
+|- package.json
+|- postcss.config.mjs
+|- README.md
+|- tailwind.config.ts
+|- tsconfig.json

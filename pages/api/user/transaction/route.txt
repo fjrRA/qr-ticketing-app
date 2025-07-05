@@ -1,0 +1,32 @@
+import type { NextApiRequest, NextApiResponse } from 'next';
+import prisma from '@lib/prisma'; // Pastikan ini sesuai path projekmu
+
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  if (req.method !== 'GET') return res.status(405).json({ error: 'Method Not Allowed' });
+
+  const { user_id } = req.query;
+
+  if (!user_id || typeof user_id !== 'string') {
+    return res.status(400).json({ error: 'User ID tidak valid' });
+  }
+
+  try {
+    const transactions = await prisma.transaction.findMany({
+      where: { user_id },
+      include: {
+        transaction_details: {
+          include: {
+            ticket: true,
+          },
+        },
+      },
+      orderBy: {
+        transaction_date: 'desc',
+      },
+    });
+
+    res.status(200).json(transactions);
+  } catch (err) {
+    res.status(500).json({ error: 'Gagal mengambil data' });
+  }
+}

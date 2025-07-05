@@ -1,0 +1,38 @@
+|- __notes --> folder yang berisi catatan saja
+|- .next
+|- lib
+   |- prisma.ts
+|- node_modules
+|- pages
+   |- api
+      |- auth
+      |- destination
+         |- delete
+            |- [id].ts
+         |- update
+            |- [id].ts
+         |- create.ts
+         |- route.ts
+      |- midtrans
+      |- user
+|- prisma
+   |- @
+   |- schema.prisma
+|- public
+|- src
+   |- app
+   |- components
+   |- modules
+   |- types
+|- styles
+|- .env
+|- .eslint.json
+|- .gitignore
+|- next-env.d.ts
+|- next.config.js
+|- package-lock.json
+|- package.json
+|- postcss.config.mjs
+|- README.md
+|- tailwind.config.ts
+|- tsconfig.json

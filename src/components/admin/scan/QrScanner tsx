@@ -1,0 +1,76 @@
+'use client'
+
+import { useRef, useState, useEffect } from "react";
+import { Html5Qrcode } from "html5-qrcode";
+import { toast } from "../../../hooks/use-toast";
+
+type QrScannerProps = {
+  onScanSuccess: (qrCode: string) => void; // Callback untuk menangani QR Code yang dipindai
+};
+
+export default function QrScanner({ onScanSuccess }: QrScannerProps) {
+  const qrRef = useRef<HTMLDivElement>(null);
+  const [scanner, setScanner] = useState<Html5Qrcode | null>(null);
+
+  // Mulai scanner QR hanya jika kamera belum aktif
+  const startScanner = async () => {
+    if (!qrRef.current) return;
+
+    // Hanya mulai scanner jika belum ada scanner yang berjalan
+    if (scanner) return;
+
+    const qrScanner = new Html5Qrcode("qr-scanner");
+    setScanner(qrScanner); // Set scanner
+
+    try {
+      const devices = await Html5Qrcode.getCameras();
+      if (devices.length === 0) {
+        toast({
+          title: "Tidak ada kamera ditemukan",
+          description: "Pastikan perangkat memiliki kamera dan izinkan aksesnya.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const cameraId = devices[0].id;
+
+      // Mulai scanner dan tunggu QR Code berikutnya
+      await qrScanner.start(
+        cameraId,
+        { fps: 10, qrbox: 250 }, // Konfigurasi fps dan ukuran qrbox
+        (decodedText) => {
+          if (decodedText) {
+            onScanSuccess(decodedText); // Panggil fungsi yang diterima dari parent
+            // Tidak menghentikan scanner, biarkan scanner terus berjalan
+          }
+        },
+        () => { /* Tidak ada tindakan yang diperlukan untuk error */ }
+      );
+    } catch (error) {
+      toast({
+        title: "Akses kamera ditolak",
+        description: "Izinkan akses kamera melalui ikon gembok di address bar.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  useEffect(() => {
+    if (scanner === null) {
+      startScanner(); // Mulai scanner hanya jika scanner belum ada
+    }
+
+    return () => {
+      if (scanner) {
+        scanner.stop(); // Berhenti saat komponen dibersihkan
+      }
+    };
+  }, [scanner]); // Hanya jalankan sekali saat komponen dimuat
+
+  return (
+    <div className="flex flex-col items-center gap-4">
+      <div id="qr-scanner" ref={qrRef} className="w-full h-[300px] rounded border" />
+    </div>
+  );
+}

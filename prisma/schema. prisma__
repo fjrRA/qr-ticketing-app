@@ -1,0 +1,232 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+/*
+Catetan:
+- Alter dulu tabel di database-nya, soalnya ada yang beda di model, ganti dari tinytexy ke tipe data yang booelan
+- Sama bagian users, tourism_owners itu nggak perlu. Cukup pengunjung website plus pengelola web aja.
+- Cek dulu udah pas kehubung apa belum ke MySQL-nya pas abis benerin tabel yang boolean itu.
+- Kalo udah kehubung, lanjut buat FE
+*/
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum OperatingDay {
+  Senin
+  Selasa
+  Rabu
+  Kamis
+  Jumat
+  Sabtu
+  Minggu
+}
+
+enum PaymentStatus {
+  pending
+  success
+  failed
+}
+
+enum TransactionStatus {
+  pending
+  paid
+  cancelled
+}
+
+enum Role {
+  admin
+  user
+  tourism_owner
+}
+
+model category_tourism {
+  category_id   String @id
+  category_name String
+  category_desc String?
+  category_icon String?
+
+  spots spot_tourism[]
+}
+
+model facility {
+  facility_id   String @id
+  facility_name String
+  facility_icon String?
+
+  facility_tourisms facility_tourism[]
+}
+
+model facility_tourism {
+  facility_tourism_id String @id
+  spot_id             String?
+  facility_id         String?
+
+  spot    spot_tourism? @relation(fields: [spot_id], references: [spot_id])
+  facility facility?   @relation(fields: [facility_id], references: [facility_id])
+}
+
+model gallery {
+  gallery_id      String @id
+  spot_id         String?
+  gallery_img     String?
+  gallery_caption String?
+
+  spot spot_tourism? @relation(fields: [spot_id], references: [spot_id])
+}
+
+model operating_hours {
+  operating_id  String @id
+  spot_id       String?
+  operating_day OperatingDay
+  hours_open    String
+  hours_closed  String
+
+  spot spot_tourism? @relation(fields: [spot_id], references: [spot_id])
+}
+
+model payment {
+  payment_id       Int    @id
+  transaction_id   Int?
+  method_id        Int?
+  reference_number String
+  payment_amount   Float
+  service_fee      Float
+  total_payment    Float
+  payment_status   PaymentStatus @default(pending)
+  payment_time     DateTime?
+  expiration_time  DateTime?
+  response_data    Json?
+
+  transaction transaction? @relation(fields: [transaction_id], references: [transaction_id])
+  method      payment_method? @relation(fields: [method_id], references: [method_id])
+}
+
+model payment_method {
+  method_id         Int    @id
+  provider_id       String?
+  method_name       String
+  method_code       String
+  method_icon       String?
+  service_fee       Float  @default(0.00)
+  minimum_payment   Float  @default(0.00)
+  maximum_payment   Float
+  is_active         Boolean @default(true)
+
+  provider payment_provider? @relation(fields: [provider_id], references: [provider_id])
+  payments payment[]
+}
+
+model payment_provider {
+  provider_id    String @id
+  provider_name  String
+  provider_desc  String?
+  provider_logo  String?
+  is_active      Boolean @default(true)
+
+  methods payment_method[]
+}
+
+model reviews {
+  reviews_id         String @id
+  spot_id            String?
+  user_id            String?
+  reviews_rating     Int?
+  reviews_desc       String?
+  reviews_created_at DateTime?
+
+  spot spot_tourism? @relation(fields: [spot_id], references: [spot_id])
+  user users?        @relation(fields: [user_id], references: [user_id])
+}
+
+model spot_tourism {
+  spot_id        String @id
+  category_id    String?
+  village_id     String?
+  spot_name      String
+  spot_desc      String?
+  spot_address   String?
+  spot_maps      String?
+  spot_thumbnail String?
+  spot_rating    Float  @default(0.00)
+  spot_contact   String?
+
+  category   category_tourism? @relation(fields: [category_id], references: [category_id])
+  village    village?          @relation(fields: [village_id], references: [village_id])
+  tickets    ticket[]
+  galleries  gallery[]
+  reviews    reviews[]
+  operating_hours operating_hours[]
+  facility_tourisms facility_tourism[]
+}
+
+model ticket {
+  ticket_id    String @id
+  spot_id      String?
+  ticket_name  String?
+  ticket_price Float
+  ticket_desc  String?
+  ticket_stock Int    @default(0)
+  code         String
+  url_qr       String
+
+  spot spot_tourism? @relation(fields: [spot_id], references: [spot_id])
+  transaction_details transaction_detail[]
+}
+
+model transaction {
+  transaction_id     Int    @id
+  user_id            String?
+  transaction_code   String
+  total_price        Float
+  transaction_status TransactionStatus @default(pending)
+  transaction_date   DateTime?
+  visit_date         DateTime
+
+  user               users? @relation(fields: [user_id], references: [user_id])
+  transaction_details transaction_detail[]
+  payments           payment[]
+}
+
+model transaction_detail {
+  transaction_detail_id Int @id
+  transaction_id        Int?
+  ticket_id             String?
+  detail_quantity       Int
+  detail_price          Float
+  detail_subtotal       Float
+
+  transaction transaction? @relation(fields: [transaction_id], references: [transaction_id])
+  ticket      ticket?       @relation(fields: [ticket_id], references: [ticket_id])
+}
+
+model users {
+  user_id      String @id
+  name         String
+  email        String   @unique
+  password     String
+  phone_number String?
+  address      String?
+  role         Role
+
+  transactions transaction[]
+  reviews      reviews[]
+}
+
+model village {
+  village_id   String @id
+  village_name String
+  village_city String
+
+  spots spot_tourism[]
+}

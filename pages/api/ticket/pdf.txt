@@ -1,0 +1,53 @@
+backup pdf.ts tanggal 19 Mei 2025
+
+import { NextApiRequest, NextApiResponse } from 'next';
+import { generateTicketPdf } from '@lib/pdf/generateTicketPdf'; // Import fungsi generate PDF
+import prisma from '@lib/prisma';
+import { generateQRCode } from '@lib/qrcode';
+
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  const { id } = req.query; // ID transaksi QR Code
+  
+  if (typeof id !== 'string') {
+    return res.status(400).json({ error: 'ID tidak valid' });
+  }
+
+  try {
+    // Ambil data transaksi dari database
+    const transaction = await prisma.transaction.findUnique({
+      where: { transaction_code: id },
+      include: {
+        transaction_details: {
+          include: {
+            ticket: true, // Sertakan relasi dengan ticket di sini
+          },
+        },
+      },
+    });
+
+    if (!transaction) {
+      return res.status(404).json({ error: 'Kode transaksi tidak ditemukan' });
+    }
+
+    // Menyiapkan data untuk PDF
+    const userName = transaction.user_id; // Ambil data pengguna
+    const destinationName = transaction.transaction_details[0]?.ticket?.ticket_name; // Ambil nama tiket
+    const date = transaction.transaction_date;
+
+    // Membuat URL QR Code untuk transaksi
+    const qrCodeUrl = await generateQRCode(id); // Menghasilkan QR Code untuk transaksi
+
+    // Generate PDF
+    const pdfBytes = await generateTicketPdf(id, qrCodeUrl, `${userName},${destinationName},${date}`);
+    
+    // Set header dengan nama file dinamis (menggunakan nomor transaksi)
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename="tiket-${id}.pdf"`); // Ganti nama file sesuai ID transaksi
+
+    // Kirimkan PDF dalam format buffer
+    res.end(Buffer.from(pdfBytes)); // Gunakan res.end() untuk mengirim buffer PDF
+  } catch (error) {
+    console.error('[PDF ERROR]', error);
+    res.status(500).json({ error: 'Gagal menghasilkan PDF' });
+  }
+}

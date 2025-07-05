@@ -1,0 +1,221 @@
+
+Enum "operating_hours_operating_day_enum" {
+  "Senin"
+  "Selasa"
+  "Rabu"
+  "Kamis"
+  "Jumat"
+  "Sabtu"
+  "Minggu"
+}
+
+Enum "payment_payment_status_enum" {
+  "pending"
+  "success"
+  "failed"
+}
+
+Enum "temp_order_status_enum" {
+  "pending"
+  "paid"
+  "cancelled"
+}
+
+Enum "transaction_transaction_status_enum" {
+  "pending"
+  "paid"
+  "cancelled"
+}
+
+Enum "transaction_detail_is_used_enum" {
+  "unverified"
+  "verified"
+}
+
+Enum "users_role_enum" {
+  "admin"
+  "user"
+}
+
+Table "category_tourism" {
+  "category_id" char(5) [pk, not null]
+  "category_name" varchar(20) [not null]
+  "category_desc" varchar(150) [default: NULL]
+  "category_icon" varchar(255) [default: NULL]
+}
+
+Table "facility" {
+  "facility_id" char(10) [pk, not null]
+  "facility_name" varchar(100) [not null]
+  "facility_icon" varchar(255) [default: NULL]
+}
+
+Table "facility_tourism" {
+  "facility_tourism_id" char(10) [pk, not null]
+  "spot_id" char(10) [default: NULL]
+  "facility_id" char(10) [default: NULL]
+}
+
+Table "gallery" {
+  "gallery_id" char(10) [pk, not null]
+  "spot_id" char(10) [default: NULL]
+  "gallery_img" varchar(255) [default: NULL]
+  "gallery_caption" varchar(255) [default: NULL]
+}
+
+Table "operating_hours" {
+  "operating_id" char(10) [pk, not null]
+  "spot_id" char(10) [default: NULL]
+  "operating_day" operating_hours_operating_day_enum [not null]
+  "hours_open" time [not null]
+  "hours_closed" time [not null]
+}
+
+Table "payment" {
+  "payment_id" int [pk, not null]
+  "transaction_id" int [not null]
+  "reference_number" varchar(50) [not null]
+  "payment_amount" decimal(10,2) [not null]
+  "payment_status" payment_payment_status_enum [not null, default: 'pending']
+  "payment_time" timestamp [not null, default: `CURRENT_TIMESTAMP`]
+  "response_data" json [not null]
+  "payment_type" varchar(50) [not null]
+}
+
+Table "resettoken" {
+  "id" int [pk, not null]
+  "token" varchar(191) [not null]
+  "user_id" char(10) [not null]
+  "expired_at" datetime(3) [not null]
+}
+
+Table "reviews" {
+  "reviews_id" varchar(50) [pk, not null]
+  "spot_id" char(10) [default: NULL]
+  "user_id" char(10) [default: NULL]
+  "reviews_rating" tinyint [default: NULL]
+  "reviews_desc" text
+  "reviews_created_at" timestamp [default: `CURRENT_TIMESTAMP`]
+}
+
+Table "spot_tourism" {
+  "spot_id" char(10) [pk, not null]
+  "category_id" char(5) [default: NULL]
+  "village_id" char(10) [default: NULL]
+  "spot_name" varchar(60) [not null]
+  "spot_desc" text
+  "spot_address" varchar(200) [default: NULL]
+  "spot_maps" text
+  "spot_thumbnail" varchar(100) [default: NULL]
+  "spot_rating" decimal(3,2) [default: '0.00']
+  "spot_contact" varchar(15) [default: NULL]
+  "createdAt" timestamp [not null, default: `CURRENT_TIMESTAMP`]
+  "latitude" double [default: NULL]
+  "longitude" double [default: NULL]
+}
+
+Table "temp_order" {
+  "temp_order_id" int [pk, not null]
+  "order_id" varchar(50) [not null]
+  "user_id" char(10) [not null]
+  "visit_date" date [not null]
+  "created_at" timestamp [not null, default: `CURRENT_TIMESTAMP`]
+  "status" temp_order_status_enum [not null, default: 'pending']
+}
+
+Table "temp_order_detail" {
+  "temp_order_detail_id" int [pk, not null]
+  "temp_order_id" int [not null]
+  "ticket_id" char(20) [not null]
+  "visitor_name" varchar(100) [default: NULL]
+  "quantity" int [not null, default: '1']
+  "price" decimal(10,2) [not null]
+  "subtotal" decimal(10,2) [not null]
+}
+
+Table "ticket" {
+  "ticket_id" char(20) [pk, not null]
+  "spot_id" char(10) [default: NULL]
+  "ticket_name" varchar(100) [default: NULL]
+  "ticket_price" decimal(10,2) [not null]
+  "ticket_desc" text
+  "ticket_stock" int [default: '0']
+  "code" varchar(10) [not null]
+  "url_qr" text [not null]
+}
+
+Table "transaction" {
+  "transaction_id" int [pk, not null]
+  "user_id" char(10) [default: NULL]
+  "transaction_code" varchar(50) [not null]
+  "total_price" decimal(10,2) [not null]
+  "transaction_status" transaction_transaction_status_enum [default: 'pending']
+  "transaction_date" timestamp [default: `CURRENT_TIMESTAMP`]
+  "visit_date" date [not null]
+  "expired_at" timestamp [default: NULL]
+  "snap_token" varchar(255) [default: NULL]
+}
+
+Table "transaction_detail" {
+  "transaction_detail_id" int [pk, not null]
+  "transaction_id" int [default: NULL]
+  "ticket_id" char(20) [default: NULL]
+  "detail_quantity" int [not null]
+  "detail_price" decimal(10,2) [not null]
+  "detail_subtotal" decimal(10,2) [default: NULL]
+  "is_used" transaction_detail_is_used_enum [not null, default: 'unverified']
+  "visitor_name" varchar(100) [default: NULL]
+}
+
+Table "users" {
+  "user_id" char(10) [pk, not null]
+  "name" varchar(100) [not null]
+  "email" varchar(100) [not null]
+  "password" varchar(100) [default: NULL]
+  "phone_number" varchar(20) [default: NULL]
+  "address" text
+  "role" users_role_enum [not null]
+  "firebase_uid" varchar(50) [default: NULL]
+}
+
+Table "village" {
+  "village_id" char(10) [pk, not null]
+  "village_name" varchar(100) [not null]
+  "village_city" varchar(100) [not null]
+}
+
+
+
+Ref "facility_tourism_facility_id_fkey":"facility"."facility_id" < "facility_tourism"."facility_id" [update: cascade, delete: cascade]
+
+Ref "facility_tourism_spot_id_fkey":"spot_tourism"."spot_id" < "facility_tourism"."spot_id" [update: cascade, delete: cascade]
+
+Ref "gallery_spot_id_fkey":"spot_tourism"."spot_id" < "gallery"."spot_id" [update: cascade, delete: cascade]
+
+Ref "operating_hours_spot_id_fkey":"spot_tourism"."spot_id" < "operating_hours"."spot_id" [update: cascade, delete: cascade]
+
+Ref "payment_transaction_id_fkey":"transaction"."transaction_id" < "payment"."transaction_id" [update: cascade, delete: cascade]
+
+Ref "resetToken_user_id_fkey":"users"."user_id" < "resettoken"."user_id" [update: cascade, delete: cascade]
+
+Ref "reviews_spot_id_fkey":"spot_tourism"."spot_id" < "reviews"."spot_id" [update: cascade, delete: cascade]
+
+Ref "reviews_user_id_fkey":"users"."user_id" < "reviews"."user_id" [update: cascade, delete: cascade]
+
+Ref "spot_tourism_category_id_fkey":"category_tourism"."category_id" < "spot_tourism"."category_id" [update: cascade, delete: set null]
+
+Ref "spot_tourism_village_id_fkey":"village"."village_id" < "spot_tourism"."village_id" [update: cascade, delete: set null]
+
+Ref "temp_order_user_id_fkey":"users"."user_id" < "temp_order"."user_id" [update: cascade, delete: cascade]
+
+Ref "temp_order_detail_temp_order_id_fkey":"temp_order"."temp_order_id" < "temp_order_detail"."temp_order_id" [update: cascade, delete: cascade]
+
+Ref "temp_order_detail_ticket_id_fkey":"ticket"."ticket_id" < "temp_order_detail"."ticket_id" [update: cascade, delete: cascade]
+
+Ref "ticket_ibfk_1":"spot_tourism"."spot_id" < "ticket"."spot_id" [delete: cascade]
+
+Ref "transaction_user_id_fkey":"users"."user_id" < "transaction"."user_id" [update: cascade, delete: cascade]
+
+Ref "transaction_detail_ticket_id_fkey":"ticket"."ticket_id" < "transaction_detail"."ticket_id" [update: cascade, delete: cascade]
+
+Ref "transaction_detail_transaction_id_fkey":"transaction"."transaction_id" < "transaction_detail"."transaction_id" [update: cascade, delete: cascade]

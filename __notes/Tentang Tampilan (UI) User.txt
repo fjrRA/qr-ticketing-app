@@ -1,0 +1,127 @@
+Saran Isi Navbar User
+- Home
+-- Tetap menjadi titik awal eksplorasi
+- Eksplorasi Wisata
+-- Menampilkan semua destinasi berdasarkan kategori (bukit, air terjun, kuliner, dll). Ini sangat cocok kamu tambahkan karena spot_tourism dan category_tourism sudah siap
+- Riwayat (Setelah Login)
+-- Sudah ada, tetap dipertahankan.
+- Tiket Saya (Setelah Login)
+-- Mengakses tiket aktif yang telah dibayar dan bisa diunduh ulang (saat ini kamu sudah punya QR code per tiket). Bisa dikategorikan sebagai:
+--- Belum digunakan
+--- Sudah digunakan
+- Profil Saya (Setelah Login)
+-- Tambahan untuk keperluan jangka panjang. Misal: ubah alamat, nomor HP, dll.
+- Logout/Login (Kalo belom masuk akun, berarti navbar-nya login, kalo udah masuk berarti berubah ke logout)
+-- Sudah sesuai, tidak perlu diubah.
+
+Kombinasi Ideal untuk Homepage
+- Hero Section (Background + Call to Action "Lihat Wisata")
+- New Spot (Destinasi Baru)
+- Jadwal Hari Ini
+- Peta Eksplorasi Kecamatan Baturraden
+- Footer dengan navigasi sosial & info perusahaan
+
+Halaman Detail Destinasi Wisata
+- Hero Image + Logo + Hamburger Menu
+- Judul Destinasi
+- Image Gallery: 6 foto destinasi
+- Harga + Tombol "Beli Tiket"
+- Deskripsi Wisata Singkat
+- Map Lokasi (embed)
+- Rekomendasi Destinasi Lain
+- Footer dengan navigasi sosial & info perusahaan
+
+Halaman Eksplorasi Wisata
+- Header dengan kategori (slider/tab): Misalnya "Semua", "Pegunungan", "Air Terjun", "Kuliner".
+- Grid Card destinasi: Menampilkan:
+-- Gambar thumbnail
+-- Nama destinasi
+-- Lokasi singkat (Desa)
+-- Harga tiket
+-- Tombol "Lihat Detail"
+Style:
+- Gunakan 2 kolom untuk mobile dan 3–4 untuk tablet/desktop.
+- Gunakan shadow halus dan rounded pada setiap card.
+
+Halaman Tiket Saya
+- Filter status: Semua, Paid, Pending
+- List Tiket Berbasis Kartu:
+-- Nama Wisata
+-- Tanggal Kunjungan
+-- Status (badge warna)
+-- Tombol “Download Tiket” (jika sudah lunas)
+UX Tip:
+- Tambahkan ikon QR kecil di samping tombol download untuk mempertegas fungsi.
+
+Halaman Profil Saya
+- Nama lengkap
+- Email
+- No HP
+- Alamat
+- Tombol "Ubah Profil"
+- Tombol "Ganti Password"
+Tambahan:
+- Tampilkan statistik seperti “Total Transaksi” atau “Destinasi yang Dikunjungi”.
+
+Revisi UI Halaman Riwayat Pembelian Tiket (sesuai screenshot)
+Masalah saat ini:
+- Terlalu padat, sulit dibaca.
+- Tidak ada pemisahan visual antar transaksi.
+- Tata letak kurang mobile-friendly.
+
+Solusi Revisi:
+- Gunakan desain card per transaksi, misalnya:
+"🧾 KODE TRANSAKSI
+ORD-XXXXXXXXXXXX
+📆 22 Mei 2025, 14:12 WIB
+📍 Curug Sitalang
+
+👥 Pengunjung:
+- GreykoJezly 10
+- Hilmi
+
+💳 Status: ✅ PAID
+💸 Total: Rp 10.000
+
+🔽 [ Download Semua Tiket ]"
+
+Tampilan Mobile:
+- Gunakan accordion per transaksi.
+- Tampilkan badge status dengan warna berbeda (🟢 PAID, 🔴 PENDING).
+========================================================
+
+Sebentar, apa yang membedakan antara "Tiket Saya" dengan "Riwayat"?
+
+ChatGPT said:
+Pertanyaan bagus! 🔍 Berikut penjelasan jelas perbedaan "Tiket Saya" dan "Riwayat" di konteks sistem pariwisata kamu:
+
+🎟️ Tiket Saya
+Fokus: Menampilkan daftar tiket yang AKTIF dan siap digunakan.
+Ciri-ciri:
+- Hanya menampilkan tiket dengan status "paid" (sudah dibayar).
+- Menyediakan QR Code dan/atau tombol "Download Tiket".
+- Menampilkan info tanggal kunjungan (bisa difilter: Hari Ini / Akan Datang).
+- Bisa digunakan sebagai boarding pass digital saat check-in di lokasi wisata.
+Tujuan Utama:
+- ✅ Tiket yang dimiliki user dan belum digunakan atau masih berlaku.
+
+📑 Riwayat
+Fokus: Menampilkan seluruh transaksi pembelian tiket (baik berhasil, pending, atau gagal).
+Ciri-ciri:
+- Menampilkan semua status: pending, paid, cancelled.
+- Bisa digunakan untuk tracking histori transaksi.
+- Menyimpan rekap pembayaran, jumlah tiket, dan total harga.
+- Mungkin tidak semua transaksi berisi tiket aktif (contoh: dibatalkan).
+Tujuan Utama:
+- 📂 Melacak semua aktivitas transaksi user, bukan hanya tiket yang aktif.
+
+🔄 Analogi Sederhana:
+- Halaman "Tiket Saya", ibarat seperti Boarding pass aktif di HP yang menampilkan tiket yang bisa digunakan
+- Halaman Riwayat, ibarat seperti rekening koran/Invoice App yang menampilkan semua transaksi yang pernah dilakukan
+
+✨ Saran UI/UX
+- "Tiket Saya" bisa menjadi bagian penting dari experience user sebelum berkunjung.
+- "Riwayat" cocok ditaruh di bagian lebih dalam (misal tab di Profil atau di bawah Tiket Saya).
+
+Kalau kamu ingin menyederhanakan, bisa juga menggabungkan keduanya jadi satu halaman dengan tab switch:
+[ Tiket Aktif ] [ Semua Riwayat ]
