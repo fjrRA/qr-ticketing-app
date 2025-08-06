@@ -8,6 +8,7 @@ A full-featured tourism ticketing system built with **Next.js**, **MySQL via Pri
 - ✅ Purchase tourism tickets
 - ✅ Midtrans Snap payment integration
 - ✅ Unique QR Code for each ticket
+- ✅ An interactive map with Leaflet
 - ✅ PDF ticket generation & download
 - ✅ Admin dashboard (manage destinations, facilities, payments)
 - ✅ Responsive design for desktop and mobile
